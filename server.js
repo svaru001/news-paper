@@ -336,8 +336,13 @@ function mapArticles(items, sectionId) {
 
 // ── Start ─────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`
+// Export for Vercel (serverless handler)
+module.exports = app;
+
+// Start local dev server when run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`
   The Daily Parallax
   ──────────────────────────────────
   Local:      http://localhost:${PORT}
@@ -345,4 +350,5 @@ app.listen(PORT, () => {
   Robots:     http://localhost:${PORT}/robots.txt
   ──────────────────────────────────
 `);
-});
+  });
+}
