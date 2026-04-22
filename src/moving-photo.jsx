@@ -304,7 +304,7 @@ window.MovingPhoto = function MovingPhoto({ scene = "city", seed = 1, caption, c
 
   return (
     <>
-      <div className={"photo " + className} style={showReal ? {border: "1px solid var(--rule-soft)"} : {}}>
+      <div className={"photo " + className} style={showReal ? {border: "2px solid var(--rule-soft)"} : {}}>
         {showReal ? (
           <img
             src={src}

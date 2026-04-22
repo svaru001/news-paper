@@ -194,7 +194,7 @@ body::before {
   aspect-ratio: 16/9;
   overflow: hidden;
   background: var(--ink);
-  border: 1px solid var(--rule-soft);
+  border: 2px solid var(--rule-soft);
   outline: 1px solid var(--rule);
   box-shadow: 0 8px 24px -12px rgba(0,0,0,0.4);
   cursor: pointer;
@@ -285,7 +285,7 @@ body::before {
   border-bottom: 1px solid var(--rule);
 }
 .story-card { cursor: pointer; display: flex; flex-direction: column; }
-.story-card .photo { aspect-ratio: 4/3; border-width: 1px; margin-bottom: 12px; }
+.story-card .photo { aspect-ratio: 4/3; border-width: 2px; margin-bottom: 12px; }
 .story-card .kicker {
   font-family: var(--font-mono); font-size: 10px;
   letter-spacing: 0.18em; text-transform: uppercase;
