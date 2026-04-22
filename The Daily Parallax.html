@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Daily Parallax — Today's Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;0,900;1,500;1,700&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/newspaper.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="src/moving-photo.jsx"></script>
+<script type="text/babel" src="src/news-fetch.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+// Client-side SEO helpers
+const SECTION_SEO = {
+  front:    { title: "The Daily Parallax — Today's Front Page",    description: "Today's top stories: breaking news, world affairs, business, technology and more — The Daily Parallax." },
+  world:    { title: "World News — The Daily Parallax",            description: "International headlines and global affairs from BBC, Reuters, AP and Al Jazeera." },
+  business: { title: "Business & Markets — The Daily Parallax",   description: "Financial markets, economic policy and corporate news from The Daily Parallax." },
+  tech:     { title: "Technology — The Daily Parallax",           description: "The latest in technology, AI, science and innovation from The Daily Parallax." },
+  science:  { title: "Science — The Daily Parallax",              description: "Scientific discoveries, research breakthroughs, climate and space from The Daily Parallax." },
+  sports:   { title: "Sports — The Daily Parallax",               description: "Live scores, match reports and sports analysis from The Daily Parallax." },
+  culture:  { title: "Culture & Arts — The Daily Parallax",       description: "Film, music, books and cultural commentary from The Daily Parallax." },
+};
+
+function setMeta(title, description, imageUrl) {
+  document.title = title;
+  const setTag = (sel, attr, val) => document.querySelector(sel)?.setAttribute(attr, val);
+  setTag('meta[name="description"]',          "content", description);
+  setTag('meta[property="og:title"]',         "content", title);
+  setTag('meta[property="og:description"]',   "content", description);
+  setTag('meta[name="twitter:title"]',        "content", title);
+  setTag('meta[name="twitter:description"]',  "content", description);
+  if (imageUrl) {
+    setTag('meta[property="og:image"]',       "content", imageUrl);
+    setTag('meta[name="twitter:image"]',      "content", imageUrl);
+  }
+}
+
+function setArticleSchema(article) {
+  const existing = document.getElementById("article-jsonld");
+  if (existing) existing.remove();
+  if (!article) return;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.headline,
+    description: article.dek,
+    image: article.image ? [article.image] : undefined,
+    datePublished: article.publishedAt || new Date().toISOString(),
+    author: { "@type": "Person", name: article.byline || "The Parallax" },
+    publisher: {
+      "@type": "NewsMediaOrganization",
+      name: "The Daily Parallax",
+      url: window.location.origin,
+    },
+    url: article.url || window.location.href,
+    mainEntityOfPage: window.location.href,
+  };
+  const s = document.createElement("script");
+  s.type = "application/ld+json";
+  s.id = "article-jsonld";
+  s.textContent = JSON.stringify(schema);
+  document.head.appendChild(s);
+}
+
+function RefreshIcon({ size = 12 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+    <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+  </svg>;
+}
+function CloseIcon({ size = 14 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 6l12 12M6 18 18 6"/></svg>;
+}
+
+function todayString() {
+  return new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+}
+
+function weatherBlurb() {
+  const opts = ["Clear skies · 68°F", "Overcast · 54°F", "Light showers · 62°F", "Crisp, dry · 59°F", "Mild, breezy · 66°F"];
+  return opts[new Date().getDate() % opts.length];
+}
+
+function Masthead({ now }) {
+  return (
+    <>
+      <div className="ribbon">
+        <span>Vol. XCIV · No. 142</span>
+        <span className="sep"/>
+        <span>{todayString()}</span>
+        <span className="sep"/>
+        <span>{weatherBlurb()}</span>
+        <div className="right">
+          <span className="live"><span className="dot"/> LIVE EDITION</span>
+        </div>
+      </div>
+      <div className="masthead">
+        <div className="masthead-ornament left"><span className="star">✦</span>EST. 1932</div>
+        <h1 className="nameplate">The Daily <em>Parallax</em></h1>
+        <div className="masthead-ornament right">LATE EDITION<span className="star">✦</span></div>
+      </div>
+      <div className="meta-row">
+        <span>{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · Singapore · London · New York</span>
+        <span>$4.50 at the newsstand · Subscribers free</span>
+      </div>
+    </>
+  );
+}
+
+function SectionNav({ sec, setSec }) {
+  return (
+    <nav className="sections">
+      {window.SECTIONS.map(s => (
+        <button key={s.id}
+          className={"section-btn" + (s.id === sec ? " active" : "")}
+          onClick={() => setSec(s.id)}>
+          {s.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function StatusNotice({ data, loading, onRefresh }) {
+  return (
+    <div className="status-notice">
+      <span className="ico">◆</span>
+      {loading ? (
+        <span>Pulling the wire — composing today's edition…</span>
+      ) : data.source === "live" ? (
+        <span>Edition composed from live wire. Fetched {new Date(data.fetchedAt || Date.now()).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}.</span>
+      ) : (
+        <span>Wire unreachable — displaying standing edition. Tap refresh to retry.</span>
+      )}
+      <button className="refresh-btn" style={{marginLeft: "auto"}} onClick={onRefresh} disabled={loading}>
+        <span className={loading ? "spinning" : ""}><RefreshIcon/></span>
+        {loading ? "Fetching" : "Refresh"}
+      </button>
+    </div>
+  );
+}
+
+function HeroStory({ article, section, onOpen }) {
+  if (!article) return null;
+  return (
+    <div className="hero-story">
+      <div className="hero-kicker">
+        <span>{article.kicker}</span>
+        <span className="rule"/>
+        <span>{article.location || ""}</span>
+      </div>
+      <h1 className="hero-headline" onClick={onOpen} style={{cursor:"pointer"}}>{article.headline}</h1>
+      <p className="hero-dek">{article.dek}</p>
+      <div className="hero-byline">
+        <span>By <b>{article.byline}</b></span>
+        <span>·</span>
+        <span>{article.time}</span>
+      </div>
+      <MovingPhoto
+        scene={window.pickScene(section, 0)}
+        seed={hashCode(article.id || article.headline)}
+        caption={`Above: ${article.location || "Global desk"} · ${article.time}`}
+        src={article.image}
+      />
+      <div className="hero-lede" onClick={onOpen} style={{cursor:"pointer"}}>
+        <p>{article.lede || article.dek}</p>
+        <p>Further developments are expected through the day as policy makers respond to shifting market conditions. The editorial desk will continue to update this page as officials issue formal statements and as reactions filter through the trading session in Asia.</p>
+      </div>
+    </div>
+  );
+}
+
+function SideColumn({ items, section, onOpen }) {
+  return (
+    <div className="sidebar-col">
+      <div className="side-headline">
+        <span>◆</span> Also On The Front
+      </div>
+      {items.map((a, i) => (
+        <div key={a.id || i} className="side-story">
+          <div style={{marginBottom: 10}}>
+            <MovingPhoto
+              scene={window.pickScene(a.section || section, i + 1)}
+              seed={hashCode(a.id || a.headline) + 7}
+              src={a.image}
+            />
+          </div>
+          <h3 onClick={() => onOpen(a)}>{a.headline}</h3>
+          <p>{a.dek}</p>
+          <div className="mini-meta">{a.byline} · {a.time}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GridSection({ items, section, onOpen }) {
+  return (
+    <>
+      <div className="below-fold-label">Below the Fold</div>
+      <div className="grid-3">
+        {items.map((a, i) => (
+          <div key={a.id || i} className="story-card" onClick={() => onOpen(a)}>
+            <MovingPhoto
+              scene={window.pickScene(a.section || section, i + 2)}
+              seed={hashCode(a.id || a.headline) + 31}
+              src={a.image}
+            />
+            <div className="kicker">{a.kicker}</div>
+            <h3>{a.headline}</h3>
+            <p>{a.dek}</p>
+            <div className="meta">{a.byline} · {a.time}</div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function BriefSection({ items, onOpen }) {
+  return (
+    <>
+      <div className="below-fold-label">In Brief</div>
+      <div className="briefs">
+        {items.map((a, i) => (
+          <div key={a.id || i} className="brief" onClick={() => onOpen(a)}>
+            <div className="num">{a.num || String(i+1).padStart(2,"0")}</div>
+            <h4>{a.headline}</h4>
+            <p>{a.dek}</p>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ReaderDrawer({ article, section, onClose }) {
+  const open = !!article;
+  return (
+    <>
+      <div className={"drawer-backdrop" + (open ? " open" : "")} onClick={onClose}/>
+      <aside className={"drawer" + (open ? " open" : "")}>
+        {article && (
+          <>
+            <div className="drawer-header">
+              <span>◆ {article.kicker || "Article"}</span>
+              <span style={{color:"var(--ink-mute)"}}>{article.time || ""}</span>
+              <button className="drawer-close" onClick={onClose}><CloseIcon/></button>
+            </div>
+            <div className="drawer-body">
+              <div style={{fontFamily:"var(--font-mono)", fontSize: 10.5, letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent-ink)"}}>
+                {article.kicker}
+              </div>
+              <h1>{article.headline}</h1>
+              <p className="dek">{article.dek}</p>
+              <div className="byline">
+                <span>By <b>{article.byline || "The Parallax"}</b></span>
+                <span>·</span>
+                <span>{article.location || "Filed from the Desk"}</span>
+                <span style={{marginLeft:"auto"}}>{article.time}</span>
+              </div>
+              <MovingPhoto
+                scene={window.pickScene(article.section || section, 0)}
+                seed={hashCode(article.id || article.headline)}
+                caption="A photograph, filed from the scene"
+                src={article.image}
+              />
+              <article style={{marginTop: 28}}>
+                <p>{article.lede || article.dek}</p>
+                <p>Correspondents across three continents describe a day in which policy statements, market reactions, and ground-level reporting all pointed to a single unmistakable conclusion: the prevailing consensus has cracked, and what replaces it will likely be contested for some time. Editors of this paper, reviewing the filings as they arrived, elected to lead with this story in recognition of that shift.</p>
+                <div className="pullquote">"Not every turning point announces itself. Some arrive quietly, in the footnotes of a communiqué."</div>
+                <p>The reporting on this page reflects the work of a dozen correspondents and the judgment of a small editorial board that has, for ninety years, tried to distinguish signal from noise. Readers are invited to consider the reporting, weigh it against their own sources, and — as our first editor wrote in 1932 — to think slowly about fast events.</p>
+                <p>We will continue to update this account as the situation develops. The moving photograph above was captured by a Parallax correspondent on assignment and is reproduced here at the subject's request.</p>
+              </article>
+            </div>
+          </>
+        )}
+      </aside>
+    </>
+  );
+}
+
+function hashCode(s) {
+  if (!s) return 1;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  return Math.abs(h) + 1;
+}
+
+function getSectionFromURL() {
+  const slug = window.location.pathname.replace(/^\//, "").split("/")[0];
+  return slug && window.SECTIONS.find(s => s.id === slug) ? slug : "front";
+}
+
+function App() {
+  const [sec, setSec] = useState(getSectionFromURL);
+  const [now, setNow] = useState(new Date());
+  const [data, setData] = useState({ source: "fallback", articles: [] });
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  async function load(sid) {
+    setLoading(true);
+    const d = await window.fetchNews(sid);
+    setData(d);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(sec); }, []);
+
+  // Sync meta + canonical whenever section changes
+  useEffect(() => {
+    const seo = SECTION_SEO[sec] || SECTION_SEO.front;
+    setMeta(seo.title, seo.description);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
+    canonical.href = sec === "front" ? window.location.origin : `${window.location.origin}/${sec}`;
+  }, [sec]);
+
+  // Update meta when an article is opened / closed
+  useEffect(() => {
+    if (open) {
+      setMeta(`${open.headline} — The Daily Parallax`, open.dek, open.image);
+      setArticleSchema(open);
+    } else {
+      const seo = SECTION_SEO[sec] || SECTION_SEO.front;
+      setMeta(seo.title, seo.description);
+      setArticleSchema(null);
+    }
+  }, [open]);
+
+  // Handle browser back / forward
+  useEffect(() => {
+    function onPopState() {
+      const s = getSectionFromURL();
+      setSec(s);
+      load(s);
+      setOpen(null);
+      window.scrollTo({top: 0, behavior: "smooth"});
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function onSection(s) {
+    if (s === sec) return;
+    const url = s === "front" ? "/" : `/${s}`;
+    history.pushState({ section: s }, "", url);
+    setSec(s);
+    load(s);
+    setOpen(null);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  const articles = data.articles || [];
+  const hero = articles.find(a => a.tier === "hero") || articles[0];
+  const side = articles.filter(a => a.tier === "side").slice(0, 3);
+  const grid = articles.filter(a => a.tier === "grid").slice(0, 3);
+  const briefs = articles.filter(a => a.tier === "brief").slice(0, 4);
+
+  return (
+    <div className="wrap" data-screen-label="01 Daily Parallax">
+      <Masthead now={now}/>
+      <SectionNav sec={sec} setSec={onSection}/>
+      <StatusNotice data={data} loading={loading} onRefresh={() => load(sec)}/>
+
+      <div className="fold">
+        <HeroStory article={hero} section={sec} onOpen={() => setOpen(hero)}/>
+        <SideColumn items={side} section={sec} onOpen={setOpen}/>
+      </div>
+
+      <GridSection items={grid} section={sec} onOpen={setOpen}/>
+      <BriefSection items={briefs} onOpen={setOpen}/>
+
+      {/* Footer colophon */}
+      <div style={{textAlign:"center", fontFamily:"var(--font-mono)", fontSize: 10.5, letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--ink-mute)", paddingTop: 20, borderTop: "3px double var(--rule)"}}>
+        ◆ The Daily Parallax · Composed by wire this morning · All photographs move ◆
+      </div>
+
+      <ReaderDrawer article={open} section={sec} onClose={() => setOpen(null)}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
