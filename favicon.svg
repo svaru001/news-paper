@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark background -->
+  <rect width="32" height="32" rx="5" fill="#1A1712"/>
+  <!-- Paper sheet -->
+  <rect x="4" y="4" width="24" height="24" rx="1.5" fill="#F3EDDF"/>
+  <!-- Masthead bar -->
+  <rect x="4" y="4" width="24" height="8" rx="1.5" fill="#1A1712"/>
+  <rect x="4" y="10" width="24" height="2" fill="#1A1712"/>
+  <!-- Nameplate text line (cream on dark) -->
+  <rect x="7" y="6.5" width="18" height="2" rx="0.5" fill="#F3EDDF"/>
+  <!-- Accent rule under nameplate -->
+  <rect x="4" y="12" width="24" height="1" fill="#C88A5C"/>
+  <!-- Left column headline -->
+  <rect x="6" y="15" width="8" height="1.5" rx="0.4" fill="#1A1712"/>
+  <!-- Left column body lines -->
+  <rect x="6" y="18"   width="8" height="1" rx="0.3" fill="#5A5140"/>
+  <rect x="6" y="20"   width="8" height="1" rx="0.3" fill="#5A5140"/>
+  <rect x="6" y="22"   width="5" height="1" rx="0.3" fill="#5A5140"/>
+  <!-- Column rule -->
+  <rect x="15.5" y="14" width="0.8" height="11" rx="0.4" fill="#C9BE9F"/>
+  <!-- Right column headline -->
+  <rect x="17.5" y="15" width="8" height="1.5" rx="0.4" fill="#1A1712"/>
+  <!-- Right column body lines -->
+  <rect x="17.5" y="18" width="8" height="1" rx="0.3" fill="#5A5140"/>
+  <rect x="17.5" y="20" width="8" height="1" rx="0.3" fill="#5A5140"/>
+  <rect x="17.5" y="22" width="5" height="1" rx="0.3" fill="#5A5140"/>
+  <!-- Bottom rule -->
+  <rect x="6" y="25" width="20" height="0.8" rx="0.4" fill="#C9BE9F"/>
+</svg>
