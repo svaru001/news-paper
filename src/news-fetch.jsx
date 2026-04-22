@@ -82,10 +82,10 @@ const FALLBACK = {
   ],
 };
 
-window.fetchNews = async function fetchNews(sectionId = "front") {
+window.fetchNews = async function fetchNews(sectionId = "front", page = 1) {
   try {
     const resp = await Promise.race([
-      fetch(`/api/news?section=${encodeURIComponent(sectionId)}`),
+      fetch(`/api/news?section=${encodeURIComponent(sectionId)}&page=${page}`),
       new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 15000)),
     ]);
 
@@ -94,9 +94,9 @@ window.fetchNews = async function fetchNews(sectionId = "front") {
     const data = await resp.json();
     if (!data.ok || !Array.isArray(data.articles)) throw new Error(data.error || "bad response");
 
-    return { source: "live", fetchedAt: data.fetchedAt, articles: data.articles };
+    return { source: "live", fetchedAt: data.fetchedAt, articles: data.articles, totalResults: data.totalResults, page };
   } catch (err) {
     console.warn("News API unavailable, using fallback:", err.message);
-    return { source: "fallback", ...FALLBACK, error: err.message };
+    return { source: "fallback", ...FALLBACK, error: err.message, page: 1 };
   }
 };

@@ -404,6 +404,29 @@ body::before {
 }
 .status-notice .ico { color: var(--accent); }
 
+/* Infinite scroll */
+.infinite-loading {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 28px 0;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.infinite-spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid var(--rule-soft); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+.infinite-end {
+  text-align: center; padding: 28px 0 8px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.colophon {
+  text-align: center; font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute);
+  padding-top: 20px; border-top: 3px double var(--rule); margin-top: 16px;
+}
+
 /* ── Tablet ────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .nameplate { font-size: 80px; }

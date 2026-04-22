@@ -23,7 +23,7 @@
 <script type="text/babel" src="src/news-fetch.jsx"></script>
 
 <script type="text/babel">
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useRef } = React;
 
 // Client-side SEO helpers
 const SECTION_SEO = {
@@ -308,12 +308,36 @@ function getSectionFromURL() {
   return slug && window.SECTIONS.find(s => s.id === slug) ? slug : "front";
 }
 
+function InfiniteCard({ a, onOpen, idx }) {
+  return (
+    <div className="story-card" onClick={() => onOpen(a)}>
+      <MovingPhoto
+        scene={window.pickScene(a.section || "front", idx % 3)}
+        seed={hashCode(a.id || a.headline) + idx}
+        src={a.image}
+      />
+      <div className="kicker" style={{marginTop: 12}}>{a.kicker}</div>
+      <h3>{a.headline}</h3>
+      <p>{a.dek}</p>
+      <div className="meta">{a.byline} · {a.time}</div>
+    </div>
+  );
+}
+
 function App() {
   const [sec, setSec] = useState(getSectionFromURL);
   const [now, setNow] = useState(new Date());
   const [data, setData] = useState({ source: "fallback", articles: [] });
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(null);
+  const [extraArticles, setExtraArticles] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sentinelRef = useRef(null);
+  // Use refs so the IntersectionObserver callback always sees fresh values
+  const stateRef = useRef({});
+  stateRef.current = { sec, page, hasMore, loadingMore, loading };
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000);
@@ -322,14 +346,46 @@ function App() {
 
   async function load(sid) {
     setLoading(true);
-    const d = await window.fetchNews(sid);
+    setExtraArticles([]);
+    setPage(1);
+    setHasMore(true);
+    const d = await window.fetchNews(sid, 1);
     setData(d);
     setLoading(false);
   }
 
+  async function loadMore() {
+    const { sec: s, page: p, hasMore: more, loadingMore: busy, loading: init } = stateRef.current;
+    if (busy || init || !more) return;
+    setLoadingMore(true);
+    const nextPage = p + 1;
+    const d = await window.fetchNews(s, nextPage);
+    const fresh = (d.articles || []).filter(a => a.tier !== "hero");
+    if (fresh.length === 0) {
+      setHasMore(false);
+    } else {
+      setExtraArticles(prev => [...prev, ...fresh]);
+      setPage(nextPage);
+      // NewsAPI caps at 100 results; stop if we've fetched them all
+      if (fresh.length < 10) setHasMore(false);
+    }
+    setLoadingMore(false);
+  }
+
+  // Set up IntersectionObserver once; loadMore reads fresh state via ref
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: "600px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => { load(sec); }, []);
 
-  // Sync meta + canonical whenever section changes
   useEffect(() => {
     const seo = SECTION_SEO[sec] || SECTION_SEO.front;
     setMeta(seo.title, seo.description);
@@ -338,7 +394,6 @@ function App() {
     canonical.href = sec === "front" ? window.location.origin : `${window.location.origin}/${sec}`;
   }, [sec]);
 
-  // Update meta when an article is opened / closed
   useEffect(() => {
     if (open) {
       setMeta(`${open.headline} — The Daily Parallax`, open.dek, open.image);
@@ -350,7 +405,6 @@ function App() {
     }
   }, [open]);
 
-  // Handle browser back / forward
   useEffect(() => {
     function onPopState() {
       const s = getSectionFromURL();
@@ -374,9 +428,9 @@ function App() {
   }
 
   const articles = data.articles || [];
-  const hero = articles.find(a => a.tier === "hero") || articles[0];
-  const side = articles.filter(a => a.tier === "side").slice(0, 3);
-  const grid = articles.filter(a => a.tier === "grid").slice(0, 3);
+  const hero   = articles.find(a => a.tier === "hero") || articles[0];
+  const side   = articles.filter(a => a.tier === "side").slice(0, 3);
+  const grid   = articles.filter(a => a.tier === "grid").slice(0, 3);
   const briefs = articles.filter(a => a.tier === "brief").slice(0, 4);
 
   return (
@@ -393,9 +447,36 @@ function App() {
       <GridSection items={grid} section={sec} onOpen={setOpen}/>
       <BriefSection items={briefs} onOpen={setOpen}/>
 
-      {/* Footer colophon */}
-      <div style={{textAlign:"center", fontFamily:"var(--font-mono)", fontSize: 10.5, letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--ink-mute)", paddingTop: 20, borderTop: "3px double var(--rule)"}}>
-        ◆ The Daily Parallax · Composed by wire this morning · All photographs move ◆
+      {/* Infinite scroll pages */}
+      {extraArticles.length > 0 && (
+        <>
+          <div className="below-fold-label">More Stories</div>
+          <div className="grid-3">
+            {extraArticles.map((a, i) => (
+              <InfiniteCard key={a.id || i} a={a} onOpen={setOpen} idx={i}/>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Loading spinner */}
+      {loadingMore && (
+        <div className="infinite-loading">
+          <span className="infinite-spinner"/>
+          Fetching more stories…
+        </div>
+      )}
+
+      {/* End of feed */}
+      {!hasMore && !loading && extraArticles.length > 0 && (
+        <div className="infinite-end">◆ End of Edition ◆</div>
+      )}
+
+      {/* Sentinel — IntersectionObserver watches this */}
+      <div ref={sentinelRef} style={{height: 1}}/>
+
+      <div className="colophon">
+        ◆ The Daily Parallax · Composed by wire this morning ◆
       </div>
 
       <ReaderDrawer article={open} section={sec} onClose={() => setOpen(null)}/>

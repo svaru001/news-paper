@@ -224,19 +224,23 @@ app.get("/api/news", async (req, res) => {
   }
 
   const section = req.query.section || "front";
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const PAGE_SIZE = 11;
 
   let apiUrl;
   if (SOURCE_SECTIONS[section]) {
     const params = new URLSearchParams({
       sources: SOURCE_SECTIONS[section],
-      pageSize: "11",
+      pageSize: PAGE_SIZE,
+      page,
       apiKey: NEWS_API_KEY,
     });
     apiUrl = `https://newsapi.org/v2/top-headlines?${params}`;
   } else if (EVERYTHING_SECTIONS[section]) {
     const params = new URLSearchParams({
       ...EVERYTHING_SECTIONS[section],
-      pageSize: "11",
+      pageSize: PAGE_SIZE,
+      page,
       language: "en",
       apiKey: NEWS_API_KEY,
     });
@@ -245,7 +249,8 @@ app.get("/api/news", async (req, res) => {
     const { category } = HEADLINE_SECTIONS[section] || { category: "general" };
     const params = new URLSearchParams({
       category,
-      pageSize: "11",
+      pageSize: PAGE_SIZE,
+      page,
       language: "en",
       apiKey: NEWS_API_KEY,
     });
@@ -268,6 +273,8 @@ app.get("/api/news", async (req, res) => {
       ok: true,
       source: "live",
       fetchedAt: new Date().toISOString(),
+      page,
+      totalResults: json.totalResults || 0,
       articles: mapArticles(articles, section),
     });
   } catch (err) {
