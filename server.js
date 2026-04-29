@@ -228,6 +228,22 @@ app.get("/sitemap.xml", (req, res) => {
 // Static assets (CSS, JS, images)
 app.use(express.static(path.join(__dirname)));
 
+// ── News cache ────────────────────────────────────────────────────────
+
+const newsCache = new Map();
+const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+
+function getCached(key) {
+  const entry = newsCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) { newsCache.delete(key); return null; }
+  return entry.data;
+}
+
+function setCached(key, data) {
+  newsCache.set(key, { data, timestamp: Date.now() });
+}
+
 // ── News API ──────────────────────────────────────────────────────────
 
 app.get("/api/news", async (req, res) => {
@@ -241,6 +257,12 @@ app.get("/api/news", async (req, res) => {
   const section = req.query.section || "front";
   const page = Math.max(1, parseInt(req.query.page) || 1);
   const PAGE_SIZE = 11;
+
+  const cacheKey = `${section}-${page}`;
+  const cached = getCached(cacheKey);
+  if (cached) {
+    return res.json({ ...cached, source: "cached" });
+  }
 
   let apiUrl;
   if (SOURCE_SECTIONS[section]) {
@@ -284,14 +306,17 @@ app.get("/api/news", async (req, res) => {
       (a) => a.title && a.title !== "[Removed]"
     );
 
-    res.json({
+    const payload = {
       ok: true,
       source: "live",
       fetchedAt: new Date().toISOString(),
       page,
       totalResults: json.totalResults || 0,
       articles: mapArticles(articles, section),
-    });
+    };
+
+    setCached(cacheKey, payload);
+    res.json(payload);
   } catch (err) {
     console.error("News fetch error:", err.message);
     res.status(502).json({ ok: false, error: err.message });
