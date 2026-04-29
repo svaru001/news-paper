@@ -8,7 +8,10 @@
         "includeFiles": [
           "The Daily Parallax.html",
           "Parallax Research.html",
-          "src/**"
+          "src/**",
+          "google02de0a1fcdc78f65.html",
+          "og-image.svg",
+          "favicon.svg"
         ]
       }
     }

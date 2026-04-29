@@ -197,6 +197,11 @@ ALL_SECTIONS.filter(s => s !== "front").forEach(section => {
   });
 });
 
+// Google Search Console verification
+app.get("/google02de0a1fcdc78f65.html", (req, res) => {
+  res.type("text/html").send("google-site-verification: google02de0a1fcdc78f65.html");
+});
+
 // robots.txt
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain").send(
