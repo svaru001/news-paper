@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F3EDDF"/>
+      <stop offset="100%" stop-color="#EAE2D0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Paper background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Top ink bar -->
+  <rect width="1200" height="160" fill="#1A1712"/>
+
+  <!-- Volume / date line -->
+  <text x="600" y="42" font-family="Georgia, serif" font-size="18" fill="#8A8069"
+    letter-spacing="6" text-anchor="middle" text-transform="uppercase">
+    VOL. XCIV · NO. 142 · ESTABLISHED 1932
+  </text>
+
+  <!-- Masthead rule top -->
+  <rect x="60" y="52" width="1080" height="1" fill="#5A5140" opacity="0.5"/>
+
+  <!-- Nameplate -->
+  <text x="600" y="138" font-family="Georgia, 'Times New Roman', serif"
+    font-size="112" font-weight="900" fill="#F3EDDF"
+    letter-spacing="-3" text-anchor="middle">
+    The Daily Parallax
+  </text>
+
+  <!-- Masthead rule bottom -->
+  <rect x="60" y="156" width="1080" height="3" fill="#C88A5C"/>
+
+  <!-- Tagline -->
+  <text x="600" y="210" font-family="Georgia, serif" font-size="19"
+    fill="#5A5140" letter-spacing="8" text-anchor="middle">
+    LIVE WIRE EDITION  ·  WORLD NEWS  ·  UPDATED HOURLY
+  </text>
+
+  <!-- Horizontal rule -->
+  <rect x="60" y="228" width="1080" height="1" fill="#C9BE9F"/>
+
+  <!-- Three column preview blocks -->
+  <!-- Col 1 -->
+  <rect x="60" y="248" width="340" height="190" rx="2" fill="#1A1712" opacity="0.06"/>
+  <rect x="76" y="264" width="200" height="14" rx="2" fill="#1A1712" opacity="0.35"/>
+  <rect x="76" y="286" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="76" y="302" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="76" y="318" width="260" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="76" y="342" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="76" y="356" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="76" y="370" width="220" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="76" y="392" width="90"  height="8"  rx="2" fill="#C88A5C" opacity="0.6"/>
+
+  <!-- Col divider -->
+  <rect x="420" y="248" width="1" height="190" fill="#C9BE9F"/>
+
+  <!-- Col 2 -->
+  <rect x="430" y="248" width="340" height="190" rx="2" fill="#1A1712" opacity="0.06"/>
+  <rect x="446" y="264" width="220" height="14" rx="2" fill="#1A1712" opacity="0.35"/>
+  <rect x="446" y="286" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="446" y="302" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="446" y="318" width="240" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="446" y="342" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="446" y="356" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="446" y="370" width="190" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="446" y="392" width="90"  height="8"  rx="2" fill="#C88A5C" opacity="0.6"/>
+
+  <!-- Col divider -->
+  <rect x="790" y="248" width="1" height="190" fill="#C9BE9F"/>
+
+  <!-- Col 3 -->
+  <rect x="800" y="248" width="340" height="190" rx="2" fill="#1A1712" opacity="0.06"/>
+  <rect x="816" y="264" width="180" height="14" rx="2" fill="#1A1712" opacity="0.35"/>
+  <rect x="816" y="286" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="816" y="302" width="308" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="816" y="318" width="280" height="10" rx="2" fill="#1A1712" opacity="0.18"/>
+  <rect x="816" y="342" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="816" y="356" width="308" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="816" y="370" width="240" height="8"  rx="2" fill="#1A1712" opacity="0.12"/>
+  <rect x="816" y="392" width="90"  height="8"  rx="2" fill="#C88A5C" opacity="0.6"/>
+
+  <!-- Bottom rule + domain -->
+  <rect x="60" y="458" width="1080" height="2" fill="#1A1712"/>
+  <text x="600" y="492" font-family="Georgia, serif" font-size="16"
+    fill="#8A8069" letter-spacing="5" text-anchor="middle">
+    YOURNEWSPAPER.ONLINE
+  </text>
+
+  <!-- Decorative stars -->
+  <text x="200" y="493" font-size="14" fill="#C88A5C" text-anchor="middle">✦</text>
+  <text x="1000" y="493" font-size="14" fill="#C88A5C" text-anchor="middle">✦</text>
+</svg>

@@ -114,7 +114,7 @@ function buildMeta(section) {
         publisher: { "@id": `${BASE_URL}/#organization` },
         potentialAction: {
           "@type": "SearchAction",
-          target: { "@type": "EntryPoint", urlTemplate: `${BASE_URL}/?section={section}` },
+          target: { "@type": "EntryPoint", urlTemplate: `${BASE_URL}/{section}` },
           "query-input": "required name=section",
         },
       },
@@ -139,12 +139,17 @@ function buildMeta(section) {
     ],
   });
 
+  const ogImage = `${BASE_URL}/og-image.svg`;
+
   return `
   <!-- Primary SEO -->
   <meta name="description" content="${escAttr(seo.description)}"/>
   <meta name="keywords" content="${escAttr(seo.keywords)}"/>
+  <meta name="author" content="The Daily Parallax"/>
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <meta name="theme-color" content="#1A1712"/>
   <link rel="canonical" href="${escAttr(url)}"/>
+  <link rel="sitemap" type="application/xml" href="${escAttr(BASE_URL)}/sitemap.xml"/>
 
   <!-- Open Graph -->
   <meta property="og:type" content="website"/>
@@ -152,12 +157,17 @@ function buildMeta(section) {
   <meta property="og:title" content="${escAttr(seo.title)}"/>
   <meta property="og:description" content="${escAttr(seo.description)}"/>
   <meta property="og:url" content="${escAttr(url)}"/>
+  <meta property="og:image" content="${escAttr(ogImage)}"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
   <meta property="og:locale" content="en_US"/>
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site" content="@dailyparallax"/>
   <meta name="twitter:title" content="${escAttr(seo.title)}"/>
   <meta name="twitter:description" content="${escAttr(seo.description)}"/>
+  <meta name="twitter:image" content="${escAttr(ogImage)}"/>
 
   <!-- Structured Data -->
   <script type="application/ld+json">${jsonLd}</script>`;
